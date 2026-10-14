@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<title>শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<link rel="manifest" href="/manifest.json">
+<meta name="theme-color" content="#1f7a4d">
+<link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<link rel="stylesheet" href="/style.css">
+<script src="/config.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+</head>
+<body>
+
+<div class="loading-screen" id="loadingScreen">
+  <div class="spinner"></div>
+  <div style="color:var(--muted); font-size:13px;">লোড হচ্ছে...</div>
+</div>
+
+<header>
+  <div class="back" id="backBtn" onclick="goBack()">←</div>
+  <div class="menu-btn" id="menuBtn" onclick="openSidebar()">☰</div>
+  <div>
+    <h1 id="headerTitle">শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা</h1>
+    <p id="headerSub" class="breadcrumb">মাদরাসা ম্যানেজমেন্ট</p>
+  </div>
+</header>
+
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+<div class="sidebar" id="sidebar">
+  <div class="sidebar-brand">
+    <img src="icon-192.png" onerror="this.style.display='none'">
+    <div class="sb-name">শায়খুল ইসলাম হিফজুল<br>কোরআন মাদরাসা</div>
+  </div>
+  <div class="sidebar-nav">
+    <div class="sidebar-item" onclick="sbGo('home')"><span class="sb-icon">🏠</span>Dashboard</div>
+    <div class="sidebar-item" onclick="sbGo('boardresult')"><span class="sb-icon">🏆</span>বোর্ড পরীক্ষার সাফল্য</div>
+    <div class="sidebar-item" onclick="sbGo('competition')"><span class="sb-icon">🎖️</span>প্রতিযোগিতার সাফল্য</div>
+    <div class="sidebar-item" onclick="sbGo('noticeview')"><span class="sb-icon">📢</span>নোটিশ (দেখুন)</div>
+    <div class="sidebar-item" onclick="sbGo('examview')"><span class="sb-icon">🎓</span>পরীক্ষার ফলাফল (দেখুন)</div>
+    <div class="sidebar-item" onclick="sbGo('diaryview')"><span class="sb-icon">📄</span>Daily Diary (দেখুন)</div>
+    <div class="sidebar-item" onclick="sbGo('teacherobsview')"><span class="sb-icon">📢</span>Teacher's Observation (দেখুন)</div>
+    <div class="sidebar-item" onclick="sbGo('admission')"><span class="sb-icon">🆕</span>ভর্তির জন্য আবেদন করুন</div>
+    <div class="sidebar-item" onclick="sbGo('academiccalendar')"><span class="sb-icon">📅</span>Academic Calendar</div>
+    <div class="sidebar-item" onclick="sbGo('routine')"><span class="sb-icon">📅</span>Class Routine</div>
+    <div class="sidebar-item" onclick="sbGo('examschedule')"><span class="sb-icon">🎓</span>Exam Schedule</div>
+    <div class="sidebar-item" onclick="sbGo('guardiancomment')"><span class="sb-icon">💬</span>Guardian's Comment</div>
+    <div class="sidebar-item" onclick="sbGo('guardian')"><span class="sb-icon">👨‍👩‍👧</span>অভিভাবক লগইন</div>
+    <div class="sidebar-item" onclick="sbGo('teacher')"><span class="sb-icon">🧑‍🏫</span>শিক্ষক লগইন</div>
+    <div class="sidebar-item" onclick="sbGo('admin')"><span class="sb-icon">🔒</span>অ্যাডমিন প্যানেল<span class="sb-badge" id="sbAdmissionBadge2" style="display:none;"></span></div>
+
+    <div class="sb-staff-only" style="display:none;">
+      <div class="sidebar-divider">👨‍🏫 স্টাফ (অ্যাডমিন)</div>
+      <div class="sidebar-item" onclick="sbGo('notice')"><span class="sb-icon">📢</span>নোটিশ পরিচালনা</div>
+      <div class="sidebar-item" onclick="sbGo('attendance')"><span class="sb-icon">✅</span>হাজিরা (Attendance)</div>
+      <div class="sidebar-item" onclick="sbGo('exam')"><span class="sb-icon">🎓</span>পরীক্ষার ফলাফল</div>
+      <div class="sidebar-item" onclick="sbGo('fees')"><span class="sb-icon">💰</span>বেতন/ফি</div>
+      <div class="sidebar-item" onclick="sbGo('accounting')"><span class="sb-icon">📊</span>হিসাব (Accounting)</div>
+      <div class="sidebar-item" onclick="sbGo('admissionreview')"><span class="sb-icon">📥</span>ভর্তির আবেদনসমূহ<span class="sb-badge" id="sbAdmissionBadge" style="display:none;"></span></div>
+      <div class="sidebar-item" onclick="sbGo('holiday')"><span class="sb-icon">🏖️</span>ছুটি পরিচালনা</div>
+      <div class="sidebar-item" onclick="sbGo('diary')"><span class="sb-icon">📄</span>Daily Diary</div>
+      <div class="sidebar-item" onclick="sbGo('teacherobs')"><span class="sb-icon">📢</span>Teacher's Observation</div>
+    </div>
+  </div>
+</div>
+
+<main>
+
+  <!-- HOME -->
+  <div class="screen active" id="screen-home">
+    <div class="brandbox">
+      <img src="/logo.png" alt="মাদ্রাসা লোগো">
+      <h1>শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা</h1>
+      <div class="addr">পুর্ব তেঘরিয়া (ঈদগাহ মহল্লা), সুনামগঞ্জ</div>
+    </div>
+
+    <div class="overview-grid" id="todaySummary"></div>
+
+    <div id="noticeBoardWrap" style="margin-top:14px;"></div>
+
+    <div id="adminLockedBox" style="display:none;"></div>
+
+    <div id="adminPanel" style="display:none;">
+      <div class="select-card">
+        <label class="lbl">১. মারহালা/জামাত বাছাই করুন</label>
+        <select id="sel_jamaat" onchange="onJamaatChange()">
+          <option value="">— বাছাই করুন —</option>
+        </select>
+      </div>
+
+      <button class="enter-btn" id="reportBtnAdmin" disabled onclick="openReport()" style="background:linear-gradient(135deg, var(--gold), #b98a1f); box-shadow:0 4px 12px rgba(212,168,58,0.35);">📊 হাজিরা দেখুন</button>
+      <button class="enter-btn" id="feeBtnAdmin" disabled onclick="openFeeScreen()" style="background:linear-gradient(135deg, var(--green), var(--green-deep)); box-shadow:0 4px 12px rgba(31,122,77,0.35);">💰 বেতন/ফি দেখুন ও পরিচালনা করুন</button>
+
+      <div class="editbar">
+        <button onclick="showScreen('screen-admission','ভর্তি ফরম','নতুন ছাত্র ভর্তি', true); renderAdmissionForm();" style="background:var(--red); color:white; border-color:var(--red);">🆕 নতুন ছাত্র ভর্তি</button>
+        <button onclick="showScreen('screen-admissions-review','ভর্তির আবেদনসমূহ','অভিভাবকদের পাঠানো নতুন আবেদন', true); renderAdmissionsReview();" style="background:var(--gold); color:white; border-color:var(--gold);">📥 ভর্তির আবেদন <span class="notif-badge admin-admission-badge" id="adminAdmissionBadgePanel"></span></button>
+        <button onclick="openModal('addJamaat')">➕ নতুন জামাত</button>
+        <button onclick="openModal('editJamaat')">✏️ জামাত/শিক্ষক এডিট</button>
+        <button onclick="openModal('manageNotice')">📢 নোটিশ পরিচালনা</button>
+        <button onclick="openModal('manageHoliday')">🏖️ ছুটি পরিচালনা</button>
+        <button onclick="openModal('addBoardResult')">🏆 বোর্ড পরীক্ষার সাফল্য</button>
+        <button onclick="openModal('manageCompetition')">🎖️ প্রতিযোগিতার সাফল্য</button>
+        <button onclick="openModal('excelImport')" style="background:var(--gold); color:white; border-color:var(--gold);">📥 এক্সেল থেকে ইমপোর্ট</button>
+        <button onclick="showScreen('screen-accounting','হিসাব','আয়-ব্যয় সারসংক্ষেপ', true); document.getElementById('acc_month').value = new Date().toISOString().slice(0,7); renderAccountingScreen();">💰 হিসাব দেখুন</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TEACHER AUTH -->
+  <div class="screen" id="screen-teacher-auth">
+    <div class="editbar" style="margin-top:0;">
+      <button id="tAuthTabLogin" onclick="switchTeacherAuthTab('login')" style="background:var(--green); color:white;">লগইন</button>
+      <button id="tAuthTabSignup" onclick="switchTeacherAuthTab('signup')">নতুন অ্যাকাউন্ট</button>
+    </div>
+    <div id="teacherAuthForm" style="margin-top:14px;"></div>
+    <div id="teacherAuthMsg" style="margin-top:10px; font-size:13px; color:var(--red); text-align:center;"></div>
+  </div>
+
+  <!-- TEACHER DASHBOARD -->
+  <div class="screen" id="screen-teacher-dash">
+    <div class="summary-card" id="teacherWelcome"></div>
+    <div class="section-label">আপনার জামাতসমূহ</div>
+    <div class="clist" id="teacherJamaatList"></div>
+    <button class="btn gold" onclick="addOldStudentFlow();">➕ পুরাতন ছাত্র যুক্ত করুন</button>
+    <button class="btn outline" onclick="teacherLogout()">🚪 লগআউট করুন</button>
+  </div>
+
+  <!-- GUARDIAN MENU -->
+  <div class="screen" id="screen-guardian-menu">
+    <div class="select-card" style="text-align:center;">
+      <div style="font-size:13px; color:var(--muted);">অভিভাবক প্যানেল থেকে প্রয়োজনীয় তথ্য নির্বাচন করুন</div>
+    </div>
+    <div class="guardian-menu-grid">
+      <button class="guardian-menu-btn" onclick="showScreen('screen-board-results','বোর্ড পরীক্ষার সাফল্য','বছর অনুযায়ী সাফল্য', true); renderBoardResults();"><span class="gm-icon">🏆</span>বোর্ড পরীক্ষার সাফল্য</button>
+      <button class="guardian-menu-btn" onclick="showScreen('screen-competition-results','বিভিন্ন প্রতিযোগিতার সাফল্য','প্রতিযোগিতায় অর্জিত সাফল্য', true); renderCompetitionResults();"><span class="gm-icon">🎖️</span>বিভিন্ন প্রতিযোগিতার সাফল্য</button>
+      <button class="guardian-menu-btn" onclick="showScreen('screen-madrasa-results','মাদ্রাসার ফলাফল','জামাতভিত্তিক পূর্ণ ফলাফল', true); renderMadrasaResultFilters();"><span class="gm-icon">📋</span>মাদ্রাসার ফলাফল</button>
+      <button class="guardian-menu-btn" onclick="showScreen('screen-guardian-search','ব্যক্তিগত তথ্য','ছাত্রের ব্যক্তিগত তথ্য', true); renderGuardianSearch();"><span class="gm-icon">👤</span>ব্যক্তিগত তথ্য</button>
+      <button class="guardian-menu-btn" onclick="showScreen('screen-admission','ভর্তি ফরম','নতুন ছাত্র ভর্তির জন্য আবেদন করুন', true); renderAdmissionForm();"><span class="gm-icon">📝</span>ভর্তির জন্য আবেদন করুন</button>
+    </div>
+  </div>
+
+  <!-- DAILY DIARY (placeholder) -->
+  <div class="screen" id="screen-daily-diary">
+    <div class="empty"><div class="big">📄</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- CLASS ROUTINE (placeholder) -->
+  <div class="screen" id="screen-class-routine">
+    <div class="empty"><div class="big">📅</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- EXAM SCHEDULE (placeholder) -->
+  <div class="screen" id="screen-exam-schedule">
+    <div class="empty"><div class="big">🎓</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- ACADEMIC CALENDAR (placeholder) -->
+  <div class="screen" id="screen-academic-calendar">
+    <div class="empty"><div class="big">📅</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- TEACHER'S OBSERVATION (placeholder) -->
+  <div class="screen" id="screen-teacher-observation">
+    <div class="empty"><div class="big">📢</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- GUARDIAN'S COMMENT (placeholder) -->
+  <div class="screen" id="screen-guardian-comment">
+    <div class="empty"><div class="big">💬</div>শীঘ্রই যুক্ত করা হবে</div>
+  </div>
+
+  <!-- GUARDIAN SEARCH -->
+  <div class="screen" id="screen-guardian-search">
+    <div class="field"><label>ছাত্র আইডি</label><input type="text" id="g_code" placeholder="যেমনঃ AKQ-2026-001" autocomplete="off"></div>
+    <div class="field"><label>অভিভাবকের মোবাইল নম্বর</label><input type="tel" id="g_mobile" placeholder="ভর্তির সময় দেওয়া নম্বর" autocomplete="off"></div>
+    <button class="btn gold" id="guardianSearchBtn" onclick="submitGuardianSearch()">🔍 সার্চ করুন</button>
+    <div id="guardianAuthMsg" style="margin-top:10px; font-size:13px; color:var(--red); text-align:center;"></div>
+    <div id="guardianSearchResults" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- BOARD RESULTS -->
+  <div class="screen" id="screen-board-results">
+    <div id="boardResultsAdminBar" style="display:none;"><button class="btn" onclick="openModal('addBoardResult')">➕ নতুন বোর্ড সাফল্য যোগ করুন</button></div>
+    <div class="select-card">
+      <label class="lbl">ফিল্টার করুন</label>
+      <select id="br_board_filter" onchange="renderBoardResults()"><option value="">সকল বোর্ড</option></select>
+      <div style="height:8px"></div>
+      <select id="br_year_filter" onchange="renderBoardResults()"></select>
+    </div>
+    <button class="btn outline" style="margin-bottom:10px;" onclick="downloadBoardResultListPdf()">📄 তালিকা PDF ডাউনলোড করুন</button>
+    <div id="boardResultsList" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- COMPETITION RESULTS -->
+  <div class="screen" id="screen-competition-results">
+    <div id="competitionResultsAdminBar" style="display:none;"><button class="btn" onclick="openModal('manageCompetition')">➕ প্রতিযোগিতার সাফল্য যোগ/পরিচালনা করুন</button></div>
+    <div class="select-card">
+      <label class="lbl">ফিল্টার করুন</label>
+      <select id="cr_year_filter" onchange="renderCompetitionResults()"><option value="">সকল সাল</option></select>
+      <div style="height:8px"></div>
+      <select id="cr_category_filter" onchange="renderCompetitionResults()"><option value="">সব ধরনের প্রতিযোগিতা</option></select>
+    </div>
+    <div id="competitionResultsList" style="margin-top:14px;"></div>
+  </div>
+
+  <!-- MADRASA FULL RESULTS -->
+  <div class="screen" id="screen-madrasa-results">
+    <div class="select-card">
+      <label class="lbl">মারহালা/জামাত</label><select id="mr_jamaat" onchange="renderMadrasaResults()"></select>
+      <div style="height:8px"></div>
+      <label class="lbl">শিক্ষাবর্ষ</label><select id="mr_year" onchange="renderMadrasaResults()"></select>
+      <div style="height:8px"></div>
+      <label class="lbl">পরীক্ষা</label><select id="mr_exam" onchange="renderMadrasaResults()"></select>
+    </div>
+    <button class="btn gold" onclick="downloadMadrasaResultsPdf()">📄 পূর্ণ ফলাফল PDF ডাউনলোড</button>
+    <div id="madrasaResultsList" style="margin-top:14px;"></div>
+  </div>
+  <!-- NEW STUDENT ADMISSION FORM (public) -->
+  <div class="screen" id="screen-admission">
+    <div class="field"><label>ছাত্রের নাম</label><input type="text" id="ad_name" placeholder="ছাত্রের পূর্ণ নাম"></div>
+    <div class="field"><label>পিতার নাম</label><input type="text" id="ad_father" placeholder="পিতার নাম"></div>
+    <div class="field"><label>মাতার নাম</label><input type="text" id="ad_mother" placeholder="মাতার নাম"></div>
+    <div class="field"><label>মোবাইল নম্বর</label><input type="text" id="ad_phone" placeholder="যোগাযোগের মোবাইল নম্বর"></div>
+    <div class="field"><label>জন্ম তারিখ</label><input type="date" id="ad_dob"></div>
+
+    <div style="font-weight:700; color:var(--green-deep); margin-top:14px;">বর্তমান ঠিকানা</div>
+    <div class="field">
+      <label>বিভাগ</label>
+      <select id="ad_cur_division" onchange="onAdmDivisionChange('cur')"><option value="">— বাছাই করুন —</option></select>
+    </div>
+    <div class="field">
+      <label>জেলা</label>
+      <select id="ad_cur_district" onchange="onAdmDistrictChange('cur')" disabled><option value="">— আগে বিভাগ বাছাই করুন —</option></select>
+    </div>
+    <div class="field">
+      <label>থানা/উপজেলা</label>
+      <select id="ad_cur_thana" disabled><option value="">— আগে জেলা বাছাই করুন —</option></select>
+    </div>
+    <div class="field"><label>গ্রাম/বাড়ি ও ডাকঘর</label><input type="text" id="ad_cur_village" placeholder="যেমনঃ গ্রাম/বাড়ি, ডাকঘর"></div>
+
+    <div style="font-weight:700; color:var(--green-deep); margin-top:14px; display:flex; align-items:center; justify-content:space-between;">
+      <span>স্থায়ী ঠিকানা</span>
+      <label style="font-weight:400; font-size:12.5px; display:flex; align-items:center; gap:6px;">
+        <input type="checkbox" id="ad_same_address" onchange="onSameAddressToggle()"> বর্তমান ঠিকানার মতোই
+      </label>
+    </div>
+    <div class="field">
+      <label>বিভাগ</label>
+      <select id="ad_perm_division" onchange="onAdmDivisionChange('perm')"><option value="">— বাছাই করুন —</option></select>
+    </div>
+    <div class="field">
+      <label>জেলা</label>
+      <select id="ad_perm_district" onchange="onAdmDistrictChange('perm')" disabled><option value="">— আগে বিভাগ বাছাই করুন —</option></select>
+    </div>
+    <div class="field">
+      <label>থানা/উপজেলা</label>
+      <select id="ad_perm_thana" disabled><option value="">— আগে জেলা বাছাই করুন —</option></select>
+    </div>
+    <div class="field"><label>গ্রাম/বাড়ি ও ডাকঘর</label><input type="text" id="ad_perm_village" placeholder="যেমনঃ গ্রাম/বাড়ি, ডাকঘর"></div>
+
+    <div style="font-weight:700; color:var(--green-deep); margin-top:14px;">পূর্ববর্তী শিক্ষা প্রতিষ্ঠানের তথ্য</div>
+    <div class="field"><label>পূর্ববর্তী মাদ্রাসা/প্রতিষ্ঠানের নাম</label><input type="text" id="ad_prev_madrasa" placeholder="পূর্বে কোন প্রতিষ্ঠানে পড়েছে (থাকলে)"></div>
+    <div class="field"><label>পূর্ববর্তী ক্লাসের নাম</label><input type="text" id="ad_prev_class" placeholder="সে পূর্বে কোন ক্লাসে পড়েছে"></div>
+
+    <div style="font-weight:700; color:var(--green-deep); margin-top:14px;">ভর্তির তথ্য</div>
+    <div class="field">
+      <label>বর্তমানে যে ক্লাসে ভর্তি হতে ইচ্ছুক</label>
+      <select id="ad_jamaat"><option value="">— বাছাই করুন —</option></select>
+    </div>
+    <div class="field"><label>ঠিকানা (অতিরিক্ত মন্তব্য, ঐচ্ছিক)</label><textarea id="ad_address" rows="2" placeholder="অতিরিক্ত কোনো তথ্য থাকলে লিখুন"></textarea></div>
+    <button class="btn gold" onclick="submitAdmission()">✅ ভর্তির আবেদন জমা দিন</button>
+    <button class="btn outline" style="margin-top:8px;" onclick="downloadAdmissionFormPdf()">📄 ফরম ডাউনলোড করুন</button>
+    <div id="admissionMsg" style="margin-top:10px; font-size:13px; text-align:center;"></div>
+  </div>
+
+  <!-- ADMISSIONS REVIEW (admin) -->
+  <div class="screen" id="screen-admissions-review">
+    <div id="admissionsReviewList"></div>
+  </div>
+
+  <!-- CLASS: attendance -->
+  <div class="screen" id="screen-class">
+    <div class="editbar" style="margin-top:0;">
+      <button onclick="openReport()">📊 রিপোর্ট</button>
+      <button onclick="openExamScreen()">📝 পরীক্ষার ফলাফল</button>
+      <button onclick="openFeeScreen()">💰 বেতন/ফি</button>
+    </div>
+    <span class="datepill" id="classDate"></span>
+    <div class="select-card" style="margin-top:10px;">
+      <label class="lbl">হাজিরার তারিখ বাছাই করুন</label>
+      <input type="date" id="attendanceDateInput" onchange="onAttendanceDateChange()" style="width:100%; padding:10px; border-radius:10px; border:1px solid rgba(18,73,46,0.15);">
+    </div>
+    <div class="stat-row" id="classStatRow"></div>
+    <div style="margin-top:16px;" id="studentList"></div>
+    <button class="btn outline" onclick="openModal('addStudent')">➕ ছাত্র যোগ করুন</button>
+    <button class="btn gold" onclick="saveAttendance()">✅ হাজিরা সেভ করুন</button>
+  </div>
+
+  <!-- REPORT -->
+  <div class="screen" id="screen-report">
+    <div class="editbar" style="margin-top:0;">
+      <button id="repTabDate" onclick="switchReportTab('date')" style="background:var(--green); color:white;">তারিখ ধরে</button>
+      <button id="repTabMonth" onclick="switchReportTab('month')">মাসিক সারসংক্ষেপ</button>
+    </div>
+    <div id="reportDateView" style="margin-top:14px;">
+      <div class="select-card">
+        <label class="lbl">তারিখ বাছাই করুন</label>
+        <input type="date" id="rep_date" onchange="renderDateReport()">
+      </div>
+      <div id="reportDateList" style="margin-top:12px;"></div>
+      <button class="btn outline" style="margin-top:12px;" onclick="downloadAttendanceReportPdf('date')">📄 রিপোর্ট PDF ডাউনলোড করুন</button>
+    </div>
+    <div id="reportMonthView" style="margin-top:14px; display:none;">
+      <div class="select-card">
+        <label class="lbl">মাস বাছাই করুন</label>
+        <input type="month" id="rep_month" onchange="renderMonthReport()">
+      </div>
+      <div id="reportMonthList" style="margin-top:12px;"></div>
+      <button class="btn outline" style="margin-top:12px;" onclick="downloadAttendanceReportPdf('month')">📄 রিপোর্ট PDF ডাউনলোড করুন</button>
+    </div>
+  </div>
+
+  <!-- EXAM -->
+  <div class="screen" id="screen-exam">
+    <div class="select-card">
+      <label class="lbl">শিক্ষাবর্ষ (বছর)</label>
+      <select id="exam_year" onchange="renderExamTable()"></select>
+    </div>
+    <div class="select-card">
+      <label class="lbl">পরীক্ষা বাছাই করুন</label>
+      <select id="exam_type" onchange="renderExamTable()">
+        <option value="sem1">১ম সাময়িক পরীক্ষা</option>
+        <option value="sem2">২য় সাময়িক পরীক্ষা</option>
+        <option value="annual">বার্ষিক পরীক্ষা</option>
+      </select>
+    </div>
+    <div class="editbar">
+      <button onclick="openModal('addSubject')">➕ নতুন বিষয় যোগ করুন</button>
+      <button onclick="openModal('editSubjects')">✏️ বিষয় এডিট</button>
+    </div>
+    <div id="examTableWrap" style="margin-top:14px; overflow-x:auto;"></div>
+    <button class="btn gold" onclick="saveExamResults()">✅ ফলাফল সেভ করুন</button>
+    <button class="btn outline" onclick="downloadMarksheetPdf()">📄 PDF ডাউনলোড করুন</button>
+  </div>
+
+  <!-- FEES -->
+  <div class="screen" id="screen-fees">
+    <div class="select-card">
+      <label class="lbl">মাস বাছাই করুন</label>
+      <input type="month" id="fee_month" onchange="renderFeeTable()">
+    </div>
+    <div id="feePermissionNote" style="font-size:12.5px; color:var(--muted); margin-bottom:8px;"></div>
+    <div id="feeTableWrap" style="overflow-x:auto;"></div>
+    <button class="btn gold" id="feeSaveBtn" onclick="saveFeeTable()">✅ বেতন তথ্য সেভ করুন</button>
+  </div>
+
+  <!-- ACCOUNTING -->
+  <div class="screen" id="screen-accounting">
+    <div class="select-card">
+      <label class="lbl">মাস বাছাই করুন</label>
+      <input type="month" id="acc_month" onchange="renderAccountingScreen()">
+    </div>
+    <div class="overview-grid" id="accSummary"></div>
+    <div id="accAdminAdd" style="margin-top:16px;"></div>
+    <div class="section-label" style="margin-top:18px;">খরচের তালিকা</div>
+    <div id="accExpenseList" style="margin-top:8px;"></div>
+  </div>
+
+</main>
+
+<!-- Hidden printable marksheet, only shown during print (must be a direct child of body) -->
+<div id="printMarksheet" style="display:none;"></div>
+
+<div class="modal-bg" id="modalBg">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="saved-toast" id="toast">হাজিরা সংরক্ষণ হয়েছে ✓</div>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

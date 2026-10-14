@@ -1,0 +1,25 @@
+{
+  "name": "madrasa-backend",
+  "version": "1.0.0",
+  "description": "শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা — Node.js + MongoDB ব্যাকএন্ড",
+  "main": "src/server.js",
+  "type": "commonjs",
+  "scripts": {
+    "start": "node src/server.js",
+    "db:init": "node scripts/init-db.js",
+    "create-admin": "node scripts/create-admin.js",
+    "test": "node --test test/api.test.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^7.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongodb": "^6.21.0"
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "name": "শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা",
+  "short_name": "শায়খুল ইসলাম মাদরাসা",
+  "description": "শায়খুল ইসলাম হিফজুল কোরআন মাদরাসা — হাজিরা, রেজাল্ট, বেতন ও ছাত্র ব্যবস্থাপনা অ্যাপ",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#faf5e6",
+  "theme_color": "#1f7a4d",
+  "lang": "bn",
+  "icons": [
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

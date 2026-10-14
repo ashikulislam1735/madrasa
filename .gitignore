@@ -1,0 +1,5 @@
+node_modules
+.env
+backups
+teacher-passwords.csv
+*.log

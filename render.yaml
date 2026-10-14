@@ -1,0 +1,22 @@
+# Render Blueprint: GitHub রিপো যুক্ত করলে API তৈরি হবে। ডেটাবেজ MongoDB Atlas (আলাদা, ফ্রি M0 আছে)।
+services:
+  - type: web
+    name: madrasa-api
+    runtime: node
+    plan: free            # সার্বক্ষণিক চালু রাখতে paid প্ল্যান (starter) নিন
+    buildCommand: npm ci --omit=dev
+    startCommand: npm run db:init && npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: MONGODB_URI
+        sync: false       # Atlas-এর connection string এখানে বসাবেন
+      - key: MONGODB_DB
+        value: madrasa
+      - key: JWT_SECRET
+        generateValue: true
+      - key: SERVE_FRONTEND
+        value: "false"
+      - key: CORS_ORIGINS
+        sync: false       # Vercel-এর ঠিকানা, যেমন https://madrasa.vercel.app
