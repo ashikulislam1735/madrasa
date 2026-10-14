@@ -1,5 +1,5 @@
-# চালু করতে: cp .env.example .env  (মান বদলান)  →  docker compose up -d --build
-# Atlas (ক্লাউড MongoDB) ব্যবহার করলে এই ফাইল লাগবে না; শুধু MONGODB_URI দিয়ে `npm start`।
+# নিজের সার্ভারে (MongoDB সহ) চালাতে: cp .env.docker.example .env → docker compose up -d --build
+# Atlas ব্যবহার করলে এই ফাইল লাগবে না।
 services:
   db:
     image: mongo:7
@@ -7,7 +7,7 @@ services:
     volumes: [mongodata:/data/db]
     healthcheck: { test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"], interval: 5s, retries: 10 }
   api:
-    build: .
+    build: ./backend
     restart: unless-stopped
     depends_on: { db: { condition: service_healthy } }
     environment:
@@ -17,7 +17,7 @@ services:
       NODE_ENV: production
       CORS_ORIGINS: ${CORS_ORIGINS:-}
     ports: ["3000:3000"]
-  backup:   # প্রতিদিন ডেটাবেজ ব্যাকআপ (./backups ফোল্ডারে, ৩০ দিন রাখে)
+  backup:   # প্রতিদিন ব্যাকআপ (./backups ফোল্ডারে, ৩০ দিন রাখে)
     image: mongo:7
     restart: unless-stopped
     depends_on: { db: { condition: service_healthy } }

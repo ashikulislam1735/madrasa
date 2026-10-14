@@ -1,5 +1,3 @@
-const path = require('path');
-const fs = require('fs');
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
@@ -36,11 +34,8 @@ app.use('/api/guardian', require('./routes/guardian'));
 
 app.use('/api', (_req, _res, next) => next(new HttpError(404, 'পাওয়া যায়নি')));
 
-// ফ্রন্টএন্ড একই সার্ভার থেকে দেওয়া যায় (frontend/ ফোল্ডার থাকলে)
-const fe = path.join(__dirname, '..', 'frontend');
-if (config.serveFrontend && fs.existsSync(fe)) {
-  app.use(express.static(fe, { index: 'index.html' }));
-}
+// এই প্রজেক্ট শুধু API; ফ্রন্টএন্ড আলাদা প্রজেক্ট (madrasa-frontend)
+app.get('/', (_req, res) => res.json({ name: 'madrasa-api', ok: true }));
 
 app.use((err, _req, res, _next) => {
   if (err.type === 'entity.parse.failed') err = new HttpError(400, 'JSON ফরম্যাট ভুল');

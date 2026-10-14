@@ -24,5 +24,4 @@ module.exports = {
   jwtSecret: jwtSecret || 'dev-only-secret-change-me-dev-only-secret',
   jwtExpires: process.env.JWT_EXPIRES || '12h',
   corsOrigins: (process.env.CORS_ORIGINS || '').split(',').map(s => s.trim()).filter(Boolean),
-  serveFrontend: process.env.SERVE_FRONTEND !== 'false',
 };
