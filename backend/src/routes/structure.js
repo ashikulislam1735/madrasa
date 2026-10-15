@@ -62,6 +62,7 @@ router.put('/jamaats/:id', requireRole('admin', 'teacher'), wrap(async (req, res
 }));
 router.delete('/jamaats/:id', admin, wrap(async (req, res) => {
   await (await col('jamaats')).deleteOne({ _id: req.params.id });
+  await (await col('routines')).deleteOne({ _id: req.params.id });
   await (await col('students')).updateMany({ jamaatId: req.params.id }, { $set: { jamaatId: null } });
   await (await col('users')).updateMany({}, { $pull: { jamaatIds: req.params.id } });
   res.json({ ok: true });

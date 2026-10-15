@@ -281,7 +281,7 @@ window.sbGo = function(key){
     case 'teacher': showScreen('screen-teacher-auth','শিক্ষক লগইন','আপনার অ্যাকাউন্ট দিয়ে প্রবেশ করুন', true); renderTeacherAuth(); break;
     case 'guardian': showScreen('screen-guardian-menu','অভিভাবক লগইন','যে তথ্য দেখতে চান বাছাই করুন', true); break;
     case 'diary': showScreen('screen-daily-diary','ডেইলি ডায়েরি','ছাত্রের দৈনন্দিন কার্যক্রম', true); break;
-    case 'routine': showScreen('screen-class-routine','ক্লাস রুটিন','সাপ্তাহিক ক্লাস রুটিন', true); break;
+    case 'routine': showScreen('screen-class-routine','ক্লাস রুটিন','সাপ্তাহিক ক্লাস রুটিন', true); renderClassRoutine(); break;
     case 'examschedule': showScreen('screen-exam-schedule','পরীক্ষার সময়সূচি','আসন্ন পরীক্ষার সময়সূচি', true); break;
     case 'academiccalendar': showScreen('screen-academic-calendar','একাডেমিক ক্যালেন্ডার','শিক্ষাবর্ষের গুরুত্বপূর্ণ তারিখ', true); break;
     case 'teacherobs': showScreen('screen-teacher-observation','শিক্ষকের পর্যবেক্ষণ','শিক্ষকের মন্তব্য ও পর্যবেক্ষণ', true); break;
@@ -983,7 +983,7 @@ function renderStudentList(){
       const status = getTodayStatus(s.id);
       return `
         <div class="srow">
-          <div class="sname" onclick="openEditStudent('${s.id}')" style="cursor:pointer;"><span class="roll">${s.roll}</span> ${s.name}</div>
+          <div class="sname" onclick="openEditStudent('${s.id}')" style="cursor:pointer;"><span class="roll">${s.roll}</span> ${safePhoto(s.photo) ? `<img class="s-photo" src="${safePhoto(s.photo)}" alt="">` : ''}${s.name}</div>
           <div class="toggle">
             <button class="present ${status==='present'?'on':''}" onclick="setStatus('${s.id}','present')">উপস্থিত</button>
             <button class="absent ${status==='absent'?'on':''}" onclick="setStatus('${s.id}','absent')">অনুপস্থিত</button>
@@ -1202,6 +1202,7 @@ window.openModal = function(type){
   bg.classList.add('show');
 
   if(type==='addStudent' || type==='editStudent'){
+    window._studentPhoto = undefined; // undefined = ছবি অপরিবর্তিত, '' = মুছে ফেলা, লেখা = নতুন ছবি
     const editing = type==='editStudent';
     const isTeacher = !!currentTeacherUid;
     const s = editing ? data.students.find(x=>x.id===modalStudentId) : null;
@@ -1227,6 +1228,16 @@ window.openModal = function(type){
       <h3>${editing ? 'ছাত্রের তথ্য এডিট' : 'নতুন ছাত্র যোগ করুন'}</h3>
       ${editing ? `<div style="background:var(--gold-light); border-radius:10px; padding:8px 12px; margin-bottom:10px; font-size:13px;"><b>ছাত্র আইডি:</b> ${s.studentId||'—'}</div>` : ''}
       <div class="sub">মৌলিক পরিচিতি</div>
+      <div class="field"><label>ছাত্রের ছবি (ঐচ্ছিক)</label>
+        <div style="display:flex; align-items:center; gap:12px;">
+          <img id="m_photo_preview" class="s-photo big" ${safePhoto(s?.photo) ? `src="${safePhoto(s.photo)}"` : 'style="display:none"'} alt="">
+          <div style="flex:1; min-width:0;">
+            <input type="file" id="m_photo_file" accept="image/*" onchange="onStudentPhotoPick(this)">
+            <div style="font-size:11.5px; color:var(--muted); margin-top:4px;">ছবি নিজে থেকেই ছোট করে রাখা হবে</div>
+            <button type="button" class="btn outline" style="margin:6px 0 0; padding:6px 10px; font-size:12px;" onclick="removeStudentPhoto()">ছবি সরান</button>
+          </div>
+        </div>
+      </div>
       <div class="field"><label>ছাত্রের পূর্ণ নাম *</label><input type="text" id="m_sname" placeholder="যেমনঃ মোঃ রাহাত" value="${s?.name||''}" autofocus></div>
       <div class="field"><label>রোল নম্বর *</label><input type="number" id="m_sroll" value="${s?.roll ?? nextRoll}"></div>
       <div class="field"><label>জন্ম তারিখ</label><input type="date" id="m_sdob" value="${s?.dob||''}"></div>
@@ -1453,6 +1464,39 @@ let modalStudentId = null;
 // শিক্ষকের সংক্ষিপ্ত ফর্মে শুধু নাম (এবং কখনো কখনো রোল) থাকে, বাকি ফিল্ড DOM-এ থাকে না —
 // সেক্ষেত্রে existing (এডিট হলে) বা fallbackRoll (নতুন ছাত্র হলে) থেকে মান নেওয়া হয়,
 // যাতে এডমিনের দেওয়া তথ্য মুছে না যায়।
+// ছবি শুধু আমাদের নিজের তৈরি JPEG ডেটা হলে দেখানো হবে (নিরাপত্তার জন্য)
+function safePhoto(p){
+  return (typeof p === 'string' && p.length < 120000 && /^data:image\/jpeg;base64,[A-Za-z0-9+\/=]+$/.test(p)) ? p : '';
+}
+window.onStudentPhotoPick = function(inp){
+  const file = inp.files && inp.files[0];
+  if(!file) return;
+  if(!/^image\//.test(file.type)){ alert('শুধু ছবির ফাইল বাছাই করুন।'); inp.value=''; return; }
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => {
+      const size = 160; // বর্গাকার ১৬০×১৬০, মাঝখান থেকে কাটা; সাধারণত ৬–১০ KB
+      const c = document.createElement('canvas'); c.width = size; c.height = size;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, size, size);
+      const m = Math.min(img.width, img.height);
+      ctx.drawImage(img, (img.width - m) / 2, (img.height - m) / 2, m, m, 0, 0, size, size);
+      window._studentPhoto = c.toDataURL('image/jpeg', 0.7);
+      const pv = document.getElementById('m_photo_preview');
+      if(pv){ pv.src = window._studentPhoto; pv.style.display = ''; }
+    };
+    img.onerror = () => { alert('ছবিটি পড়া যায়নি, অন্য ছবি দিয়ে চেষ্টা করুন।'); inp.value = ''; };
+    img.src = reader.result;
+  };
+  reader.onerror = () => alert('ছবিটি পড়া যায়নি, অন্য ছবি দিয়ে চেষ্টা করুন।');
+  reader.readAsDataURL(file);
+};
+window.removeStudentPhoto = function(){
+  window._studentPhoto = '';
+  const pv = document.getElementById('m_photo_preview'); if(pv){ pv.removeAttribute('src'); pv.style.display = 'none'; }
+  const f = document.getElementById('m_photo_file'); if(f) f.value = '';
+};
 function readStudentForm(existing, fallbackRoll){
   const g = id => document.getElementById(id);
   const rollEl = g('m_sroll');
@@ -1472,7 +1516,8 @@ function readStudentForm(existing, fallbackRoll){
     division: g('m_division')?.value ?? existing?.division ?? '',
     district: g('m_district')?.value ?? existing?.district ?? '',
     thana: g('m_thana')?.value ?? existing?.thana ?? '',
-    village: g('m_village')?.value.trim() ?? existing?.village ?? ''
+    village: g('m_village')?.value.trim() ?? existing?.village ?? '',
+    photo: window._studentPhoto !== undefined ? window._studentPhoto : (existing?.photo ?? '')
   };
 }
 
@@ -2502,6 +2547,108 @@ window.downloadGuardianResultPdf = function(studentId){
   `;
   setTimeout(()=>window.print(), 200);
 }
+
+
+// ---------- ক্লাস রুটিন ----------
+// দেখা সবার জন্য; যোগ/মুছা শুধু অ্যাডমিন। ডেটা আলাদা API (/routines) থেকে আসে।
+const ROUTINE_DAYS = [['sat','শনিবার'],['sun','রবিবার'],['mon','সোমবার'],['tue','মঙ্গলবার'],['wed','বুধবার'],['thu','বৃহস্পতিবার'],['fri','শুক্রবার']];
+let routineAll = {}, routineJamaatId = null, routineOptions = [], routineIsGuardian = false;
+
+function routineTimeBn(t){
+  const [h, m] = String(t).split(':').map(Number);
+  const part = h < 4 ? 'রাত' : h < 6 ? 'ভোর' : h < 12 ? 'সকাল' : h < 16 ? 'দুপুর' : h < 18 ? 'বিকাল' : h < 20 ? 'সন্ধ্যা' : 'রাত';
+  const h12 = h % 12 === 0 ? 12 : h % 12;
+  return `${part} ${toBn(h12)}:${toBn(String(m).padStart(2,'0'))}`;
+}
+
+window.renderClassRoutine = async function(){
+  const box = document.getElementById('routineBox');
+  box.innerHTML = '<div class="empty"><div class="big">📅</div>লোড হচ্ছে...</div>';
+  try{ routineAll = await api.get('/routines'); }
+  catch(e){ box.innerHTML = `<div class="empty"><div class="big">⚠️</div>রুটিন লোড করা যায়নি।<br>${escapeHtml(e.message||'')}</div>`; return; }
+  routineIsGuardian = api.role === 'guardian';
+  if(routineIsGuardian){
+    const jid = data.students?.[0]?.jamaatId || null;
+    const j = data.jamaats.find(x=>x.id===jid);
+    routineOptions = jid ? [{ id: jid, name: j?.name || 'আপনার সন্তানের জামাত' }] : [];
+  } else {
+    routineOptions = data.jamaats.map(j=>({ id: j.id, name: j.name }));
+  }
+  if(!routineOptions.length){ box.innerHTML = '<div class="empty"><div class="big">📅</div>কোনো জামাত পাওয়া যায়নি।</div>'; return; }
+  if(!routineOptions.some(o=>o.id===routineJamaatId)){
+    routineJamaatId = (routineOptions.find(o=>o.id===state.jamaatId) || routineOptions[0]).id;
+  }
+  drawClassRoutine();
+};
+
+function drawClassRoutine(){
+  const box = document.getElementById('routineBox');
+  const isAdmin = api.role === 'admin';
+  const entries = routineAll[routineJamaatId] || [];
+  const picker = routineIsGuardian
+    ? `<div class="sub" style="margin-bottom:10px;">${escapeHtml(routineOptions[0].name)}</div>`
+    : `<div class="field"><label>জামাত</label><select onchange="onRoutineJamaatChange(this.value)">${routineOptions.map(o=>`<option value="${escapeHtml(o.id)}" ${o.id===routineJamaatId?'selected':''}>${escapeHtml(o.name)}</option>`).join('')}</select></div>`;
+  const addBtn = isAdmin ? `<button class="btn" onclick="openRoutineForm()">➕ ক্লাস যোগ করুন</button>` : '';
+  const days = ROUTINE_DAYS.map(([key, label])=>{
+    const list = entries.map((e,i)=>({ ...e, i })).filter(e=>e.day===key).sort((a,b)=>a.start.localeCompare(b.start));
+    if(!list.length) return '';
+    return `<div class="box" style="margin-bottom:10px;"><div class="sub" style="margin:0 0 6px;">${label}</div>` +
+      list.map(e=>`
+        <div style="display:flex; align-items:center; gap:8px; padding:7px 0; border-top:1px solid #eee;">
+          <div style="min-width:120px; font-size:12.5px; color:var(--muted);">${routineTimeBn(e.start)} – ${routineTimeBn(e.end)}</div>
+          <div style="flex:1; min-width:0; font-weight:600; font-size:14px;">${escapeHtml(e.subject)}${e.teacher ? `<div style="font-weight:400; font-size:12px; color:var(--muted);">${escapeHtml(e.teacher)}</div>` : ''}</div>
+          ${isAdmin ? `<button class="btn outline" style="margin:0; padding:4px 8px; width:auto;" onclick="deleteRoutineEntry(${e.i})">🗑️</button>` : ''}
+        </div>`).join('') + `</div>`;
+  }).join('');
+  box.innerHTML = picker + addBtn + (days || `<div class="empty"><div class="big">📅</div>এই জামাতের রুটিন এখনো দেওয়া হয়নি।</div>`);
+}
+
+window.onRoutineJamaatChange = function(id){ routineJamaatId = id; drawClassRoutine(); };
+
+async function saveRoutine(entries){
+  try{
+    const r = await api.put('/routines/' + encodeURIComponent(routineJamaatId), { entries });
+    routineAll[routineJamaatId] = r.entries;
+    drawClassRoutine();
+    return true;
+  }catch(e){ alert('রুটিন সংরক্ষণ করা যায়নি: ' + (e.message || e)); return false; }
+}
+
+window.openRoutineForm = function(){
+  if(api.role !== 'admin') return;
+  const j = data.jamaats.find(x=>x.id===routineJamaatId);
+  const subs = (j?.subjects || []).map(s=>s.name).filter(Boolean);
+  const dayBoxes = ROUTINE_DAYS.map(([k,l])=>`<label style="display:inline-flex; align-items:center; gap:4px; margin:0 12px 8px 0; font-size:13px;"><input type="checkbox" class="rt_day" value="${k}"> ${l}</label>`).join('');
+  document.getElementById('modalContent').innerHTML = `
+    <span class="modal-close" onclick="closeModal()">✕</span>
+    <h3>📅 ক্লাস যোগ করুন</h3>
+    <div class="sub">${escapeHtml(j?.name || '')}</div>
+    <div class="field"><label>কোন কোন দিন *</label><div>${dayBoxes}</div></div>
+    <div class="field"><label>শুরুর সময় *</label><input type="time" id="rt_start" value="08:00"></div>
+    <div class="field"><label>শেষের সময় *</label><input type="time" id="rt_end" value="09:00"></div>
+    <div class="field"><label>বিষয় *</label><input type="text" id="rt_subject" list="rt_subjects" placeholder="যেমনঃ কুরআন">
+      <datalist id="rt_subjects">${subs.map(n=>`<option value="${escapeHtml(n)}"></option>`).join('')}</datalist></div>
+    <div class="field"><label>শিক্ষক (ঐচ্ছিক)</label><input type="text" id="rt_teacher"></div>
+    <button class="btn" onclick="submitRoutineEntry()">যোগ করুন</button>`;
+  document.getElementById('modalBg').classList.add('show');
+};
+
+window.submitRoutineEntry = async function(){
+  const days = [...document.querySelectorAll('.rt_day:checked')].map(x=>x.value);
+  const start = document.getElementById('rt_start').value, end = document.getElementById('rt_end').value;
+  const subject = document.getElementById('rt_subject').value.trim(), teacher = document.getElementById('rt_teacher').value.trim();
+  if(!days.length){ alert('অন্তত একটি দিন বাছাই করুন।'); return; }
+  if(!start || !end || end <= start){ alert('শুরু ও শেষের সময় ঠিক করে দিন (শেষ সময় শুরুর পরে হতে হবে)।'); return; }
+  if(!subject){ alert('বিষয়ের নাম দিন।'); return; }
+  const entries = (routineAll[routineJamaatId] || []).concat(days.map(day=>({ day, start, end, subject, teacher })));
+  if(await saveRoutine(entries)) closeModal();
+};
+
+window.deleteRoutineEntry = async function(i){
+  const cur = routineAll[routineJamaatId] || [];
+  if(!cur[i] || !confirm('এই ক্লাসটি রুটিন থেকে মুছে ফেলবেন?')) return;
+  await saveRoutine(cur.filter((_, idx)=>idx!==i));
+};
 
 
 loadData();

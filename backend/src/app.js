@@ -29,6 +29,7 @@ app.use('/api/attendance', require('./routes/attendance'));
 app.use('/api/exams', require('./routes/exams'));
 app.use('/api/accounts', require('./routes/accounts'));
 app.use('/api', require('./routes/content'));
+app.use('/api', require('./routes/routine'));
 app.use('/api/admissions', require('./routes/admissions'));
 app.use('/api/guardian', require('./routes/guardian'));
 
