@@ -72,6 +72,7 @@ async function loadData(){
   document.getElementById('loadingScreen').classList.add('hide');
   refreshAfterLoad();
   loadBdGeo(); // load in background, doesn't block UI
+  if (location.pathname.replace(/\/+$/, '') === '/admin') setTimeout(() => sbGo('admin'), 300); // /admin ঠিকানা খুললে সরাসরি অ্যাডমিন লগইন
 }
 function refreshAfterLoad(){
   populateBranchSelect();
