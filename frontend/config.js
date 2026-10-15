@@ -1,3 +1,3 @@
 // ফ্রন্টএন্ড আলাদা ডোমেইনে (যেমন Vercel) হোস্ট করলে এখানে Render-এ থাকা ব্যাকএন্ডের ঠিকানা বসান (শেষে / ছাড়া)।
 // একই সার্ভার থেকে ফ্রন্টএন্ড দিলে খালি রাখুন।
-window.API_BASE = '';   // উদাহরণ: 'https://madrasa-api.onrender.com'
+window.API_BASE = 'https://madrasa-api-kxiv.onrender.com';
